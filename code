@@ -1,0 +1,28 @@
+//#####################################################################################//
+// PCB HEIGHT PROBE USING VACUUM (C) Cri.S <phone.cri@gmail.com> all right reserved
+//#####################################################################################//
+// CONFIGURATION SECTION
+limit=6; 	limit0=100; 
+vacD=30; vacL=1000; safeZ=-15; speed=0.2; sleep=200;
+speed =0.2; sleep=200; 	speed_ =0.2; sleep_1=200; 	height0=-0.4; 	height_0=0.0;
+speed1=1.; 	sleep1=50; 	speed_1=0.7; sleep_1=80; 	height1=-1; 	height_1=0.5;
+speed2=0.5;	sleep2=130; speed_2=0.3; sleep_2=200; 	height2=-0.1; 	height_2=0.5;
+speed3=0.2; sleep3=200; speed_3=0.2; sleep_3=200; 	height3=-0.01; 	height_3=0.3;
+
+// DONT edit below this section unless you know what your do
+//##############################################################################//
+n=machine.getDefaultHead().getDefaultNozzle(); a=machine.getActuator("air1"); vac=machine.getActuator("vac1"); 
+delta =n.getLocation().derive(0.,0.,height0,0.); delta_ =n.getLocation().derive(0.,0.,height_0,0.); 
+delta1=n.getLocation().derive(0.,0.,height1,0.); delta_1=n.getLocation().derive(0.,0.,height_1,0.); 
+delta2=n.getLocation().derive(0.,0.,height2,0.); delta_2=n.getLocation().derive(0.,0.,height_2,0.); 
+delta3=n.getLocation().derive(0.,0.,height3,0.); delta_3=n.getLocation().derive(0.,0.,height_3,0.); 
+
+// CODE
+//##############################################################################//
+move(loc,speed,sleep,a) { n.moveTo(n.getlocation().add(loc),speed); Thread.sleep(sleep); }
+i=vac.read(); if(i<vacMin||i>vacMax) throw new Exception("VAC SENSOR DISCONNECTED");
+n.moveTo(nd,nd,safeZ,nd); v=vac.read()+vacD; a.actuate(false); Thread.sleep(200); 
+l=0; while(vac.read()<v&&l++<limit) move(delta1,speed1,sleep1); a.actuate(true); move(delta_1,speed1,1); a.actuate(false); Thread.sleep(sleep_1); while(vac.read()>v); Thread.sleep(sleep_1);
+l=0; while(vac.read()<v&&l++<limit) move(delta2,speed2,sleep2); a.actuate(true); move(delta_2,speed_2,1); a.actuate(false); Thread.sleep(sleep_2); while(vac.read()>v); Thread.sleep(sleep_2);
+l=0; while(vac.read()<v&&l++<limit) move(delta3,speed3,sleep3); a.actuate(true); move(delta_3,speed_3,1); a.actuate(false); Thread.sleep(sleep_3); while(vac.read()>v); Thread.sleep(sleep_3);
+move(delta,speed,sleep); l=0 while(vac.read()<vacM&&l++<limit0) move(delta3,speed3,sleep3); if(l>limit) throw new Exception("SAFETY STOP FOR PCB HEIGHT PROBE"); move(delta_,speed,sleep);
